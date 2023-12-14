@@ -6,6 +6,9 @@ from django.contrib.auth import authenticate, login , update_session_auth_hash, 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from post.models import Post
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
+
 # from posts.models import Post
 # Create your views here.
 
@@ -39,7 +42,22 @@ def user_login(request):
     else:
         form = AuthenticationForm()
         return render(request, 'register.html', {'form' : form, 'type' : 'Login'})
-
+class UserLogin(LoginView):
+    template_name='register.html'
+    def get_success_url(self) -> str:
+        return reverse_lazy('profile')
+    success_url = reverse_lazy('profile')
+    def form_valid(self, form):
+        messages.success(self.request, 'Logged in Successfully')
+        return super().form_valid(form)
+    def form_invalid(self, form):
+        messages.success(self.request, 'Logged in Information Incorrect')
+        return super().form_valid(form)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["type"] = 'Login' 
+        return context
+    
 
 def pass_change(request):
     if request.method == 'POST':
